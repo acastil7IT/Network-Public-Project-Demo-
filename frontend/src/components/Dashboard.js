@@ -22,8 +22,21 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchDashboardStats();
-    const interval = setInterval(fetchDashboardStats, 30000); // Refresh every 30 seconds
+    const fetchData = async () => {
+      try {
+        const response = await mockApi.getDashboardStats();
+        setStats(response);
+        setError(null);
+      } catch (err) {
+        setError('Failed to fetch dashboard statistics');
+        console.error('Dashboard stats error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+    const interval = setInterval(fetchData, 30000); // Refresh every 30 seconds
     return () => clearInterval(interval);
   }, []);
 

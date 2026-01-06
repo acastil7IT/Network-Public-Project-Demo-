@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, Row, Col, Button, Select, Input, Table, Tag, Progress, Alert, Tabs } from 'antd';
 import { 
   ScanOutlined, 
@@ -56,7 +56,7 @@ const AdvancedScanning = () => {
       setScanProgress(100);
       
       // Generate realistic mock results
-      const mockResults = generateMockScanResults(scanType, selectedTarget);
+      const mockResults = generateMockScanResults(scanType);
       setScanResults(mockResults);
       
       // Add to recent scans
@@ -77,7 +77,7 @@ const AdvancedScanning = () => {
     }, 3000);
   };
 
-  const generateMockScanResults = (type, target) => {
+  const generateMockScanResults = (type) => {
     const baseResults = [
       {
         key: '1',
