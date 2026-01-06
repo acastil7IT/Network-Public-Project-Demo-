@@ -1,0 +1,15 @@
+{
+  "name": "securenet-monitor-demo",
+  "version": "1.0.0",
+  "description": "SecureNet Monitor - Network Security Dashboard Demo",
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "start": "cd frontend && npm start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/acastil7IT/Network-Public-Project-Demo-.git"
+  },
+  "author": "Alejandro Castillo",
+  "license": "MIT"
+}

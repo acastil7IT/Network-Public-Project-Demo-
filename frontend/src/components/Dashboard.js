@@ -7,7 +7,7 @@ import {
   ExclamationCircleOutlined 
 } from '@ant-design/icons';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import axios from 'axios';
+import mockApi from '../services/mockApi';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -29,12 +29,8 @@ const Dashboard = () => {
 
   const fetchDashboardStats = async () => {
     try {
-      const response = await axios.get('http://localhost:8001/api/dashboard/stats', {
-        headers: {
-          'Authorization': 'Bearer demo-token' // In production, use real JWT
-        }
-      });
-      setStats(response.data);
+      const response = await mockApi.getDashboardStats();
+      setStats(response);
       setError(null);
     } catch (err) {
       setError('Failed to fetch dashboard statistics');

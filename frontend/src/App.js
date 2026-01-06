@@ -56,6 +56,17 @@ function App() {
   return (
     <Router>
       <Layout style={{ minHeight: '100vh' }}>
+        {/* Demo Banner */}
+        <div style={{ 
+          background: 'linear-gradient(90deg, #1890ff, #722ed1)', 
+          color: 'white', 
+          padding: '8px 16px', 
+          textAlign: 'center',
+          fontSize: '14px',
+          fontWeight: 'bold'
+        }}>
+          🛡️ SecureNet Monitor - Live Demo | Portfolio Project by Alejandro Castillo | Mock Data Only
+        </div>
         <Sider
           breakpoint="lg"
           collapsedWidth="0"

@@ -39,38 +39,25 @@ const AdvancedScanning = () => {
     setScanning(true);
     setScanProgress(0);
     
-    try {
-      // Simulate scan progress
-      const progressInterval = setInterval(() => {
-        setScanProgress(prev => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + 10;
-        });
-      }, 1000);
-
-      // Start the actual scan
-      const response = await axios.post('http://localhost:8001/api/advanced-scan', {
-        target: selectedTarget,
-        scan_type: scanType
-      }, {
-        headers: {
-          'Authorization': 'Bearer demo-token'
+    // Demo version - uses mock data only for public safety
+    const progressInterval = setInterval(() => {
+      setScanProgress(prev => {
+        if (prev >= 90) {
+          clearInterval(progressInterval);
+          return 90;
         }
+        return prev + 10;
       });
+    }, 500);
 
+    // Simulate realistic scan time
+    setTimeout(() => {
       clearInterval(progressInterval);
       setScanProgress(100);
       
-      // Use real API results
-      const apiResults = response.data.findings.map((finding, index) => ({
-        key: index.toString(),
-        ...finding
-      }));
-      
-      setScanResults(apiResults);
+      // Generate realistic mock results
+      const mockResults = generateMockScanResults(scanType, selectedTarget);
+      setScanResults(mockResults);
       
       // Add to recent scans
       const newScan = {
@@ -78,23 +65,16 @@ const AdvancedScanning = () => {
         target: selectedTarget,
         type: scanType,
         timestamp: new Date().toISOString(),
-        findings: apiResults.length,
+        findings: mockResults.length,
         status: 'completed'
       };
       setRecentScans(prev => [newScan, ...prev.slice(0, 4)]);
       
-    } catch (error) {
-      console.error('Scan failed:', error);
-      // Fallback to mock results if API fails
-      const mockResults = generateMockScanResults(scanType, selectedTarget);
-      setScanResults(mockResults);
-      setScanProgress(100);
-    } finally {
       setTimeout(() => {
         setScanning(false);
         setScanProgress(0);
       }, 1000);
-    }
+    }, 3000);
   };
 
   const generateMockScanResults = (type, target) => {
