@@ -29,7 +29,7 @@ const Dashboard = () => {
 
   const fetchDashboardStats = async () => {
     try {
-      const response = await axios.get('/api/dashboard/stats', {
+      const response = await axios.get('http://localhost:8001/api/dashboard/stats', {
         headers: {
           'Authorization': 'Bearer demo-token' // In production, use real JWT
         }

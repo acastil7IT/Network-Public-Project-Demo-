@@ -92,6 +92,32 @@ services:
       - dashboard
       - api-gateway
 
+  # Advanced Security Tools Container
+  security-tools:
+    build: ./services/security-tools
+    privileged: true
+    network_mode: host
+    depends_on:
+      - postgres
+      - test-targets
+    volumes:
+      - ./security-results:/app/results
+    environment:
+      - DATABASE_URL=postgresql://admin:secure123@localhost:5433/securenet
+    command: ["sleep", "infinity"]  # Keep container running for manual scans
+
+  # Vulnerable Test Environment
+  test-targets:
+    build: ./services/test-targets
+    ports:
+      - "2222:22"    # SSH
+      - "8080:80"    # HTTP
+      - "8081:8080"  # Vulnerable web app
+      - "2121:21"    # FTP
+      - "3307:3306"  # MySQL
+    environment:
+      - MYSQL_ROOT_PASSWORD=vulnerable123
+
   # Grafana for metrics
   grafana:
     image: grafana/grafana:latest

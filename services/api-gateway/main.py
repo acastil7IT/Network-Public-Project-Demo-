@@ -172,7 +172,7 @@ async def get_dashboard_stats(user=Depends(get_current_user)):
             
             # Top source IPs
             top_ips = await conn.fetch("""
-                SELECT source_ip, COUNT(*) as count
+                SELECT source_ip::text as source_ip, COUNT(*) as count
                 FROM network_traffic 
                 WHERE timestamp > NOW() - INTERVAL '24 hours'
                 GROUP BY source_ip 
@@ -194,7 +194,7 @@ async def get_dashboard_stats(user=Depends(get_current_user)):
             open_incidents=open_incidents or 0,
             critical_incidents=critical_incidents or 0,
             packets_last_hour=packets_last_hour or 0,
-            top_source_ips=[{"ip": row["source_ip"], "count": row["count"]} for row in top_ips],
+            top_source_ips=[{"ip": str(row["source_ip"]), "count": row["count"]} for row in top_ips],
             incident_trends=[{"date": str(row["date"]), "count": row["count"]} for row in trends]
         )
         
@@ -228,7 +228,7 @@ async def get_incidents(
         async with db_pool.acquire() as conn:
             rows = await conn.fetch(query, *params)
             
-        return [SecurityIncident(**dict(row)) for row in rows]
+        return [SecurityIncident(**{**dict(row), 'source_ip': str(row['source_ip']) if row['source_ip'] else None}) for row in rows]
         
     except Exception as e:
         logger.error("Failed to get incidents", error=str(e))
@@ -255,7 +255,7 @@ async def get_network_traffic(
         async with db_pool.acquire() as conn:
             rows = await conn.fetch(query, *params)
             
-        return [NetworkTraffic(**dict(row)) for row in rows]
+        return [NetworkTraffic(**{**dict(row), 'source_ip': str(row['source_ip']), 'dest_ip': str(row['dest_ip'])}) for row in rows]
         
     except Exception as e:
         logger.error("Failed to get traffic data", error=str(e))
@@ -341,6 +341,141 @@ async def resolve_incident(
     except Exception as e:
         logger.error("Failed to resolve incident", error=str(e))
         raise HTTPException(status_code=500, detail="Failed to resolve incident")
+
+@app.post("/api/advanced-scan")
+async def start_advanced_scan(
+    scan_request: dict,
+    user=Depends(get_current_user)
+):
+    """Start an advanced security scan"""
+    try:
+        target = scan_request.get("target", "localhost")
+        scan_type = scan_request.get("scan_type", "comprehensive")
+        
+        logger.info("Advanced scan requested", target=target, scan_type=scan_type)
+        
+        # For demo purposes, simulate scan results
+        # In production, this would trigger actual security tools
+        
+        scan_results = []
+        
+        if scan_type == "comprehensive":
+            scan_results = [
+                {
+                    "finding": "Open Port: 80/tcp (HTTP)",
+                    "severity": "INFO",
+                    "tool": "Nmap",
+                    "description": "HTTP service detected on port 80"
+                },
+                {
+                    "finding": "Open Port: 443/tcp (HTTPS)", 
+                    "severity": "INFO",
+                    "tool": "Nmap",
+                    "description": "HTTPS service detected on port 443"
+                },
+                {
+                    "finding": "SSH Service: OpenSSH 8.2",
+                    "severity": "LOW",
+                    "tool": "Nmap",
+                    "description": "SSH service version detected"
+                },
+                {
+                    "finding": "Web Server: Apache/2.4.41",
+                    "severity": "INFO", 
+                    "tool": "Nmap",
+                    "description": "Apache web server detected"
+                }
+            ]
+        elif scan_type == "vulnerability":
+            scan_results = [
+                {
+                    "finding": "Directory Listing Enabled",
+                    "severity": "MEDIUM",
+                    "tool": "Nikto",
+                    "description": "Server allows directory browsing"
+                },
+                {
+                    "finding": "Missing Security Headers",
+                    "severity": "LOW",
+                    "tool": "Nikto", 
+                    "description": "X-Frame-Options header not set"
+                },
+                {
+                    "finding": "Admin Panel Found: /admin",
+                    "severity": "HIGH",
+                    "tool": "Dirb",
+                    "description": "Administrative interface discovered"
+                }
+            ]
+        elif scan_type == "fast":
+            scan_results = [
+                {
+                    "finding": "Open Port: 80/tcp",
+                    "severity": "INFO",
+                    "tool": "Nmap",
+                    "description": "HTTP port open"
+                },
+                {
+                    "finding": "Open Port: 443/tcp",
+                    "severity": "INFO", 
+                    "tool": "Nmap",
+                    "description": "HTTPS port open"
+                }
+            ]
+        
+        # Create an incident for high-severity findings
+        high_severity_findings = [f for f in scan_results if f["severity"] in ["HIGH", "CRITICAL"]]
+        if high_severity_findings:
+            async with db_pool.acquire() as conn:
+                description = f"Advanced {scan_type} scan found {len(high_severity_findings)} high-severity issues on {target}"
+                await conn.execute("""
+                    INSERT INTO security_incidents 
+                    (created_at, severity, incident_type, source_ip, description, status)
+                    VALUES (NOW(), 'MEDIUM', 'ADVANCED_SCAN', $1, $2, 'OPEN')
+                """, target, description)
+        
+        return {
+            "status": "completed",
+            "target": target,
+            "scan_type": scan_type,
+            "findings": scan_results,
+            "total_findings": len(scan_results),
+            "high_severity": len(high_severity_findings)
+        }
+        
+    except Exception as e:
+        logger.error("Advanced scan failed", error=str(e))
+        raise HTTPException(status_code=500, detail="Advanced scan failed")
+
+@app.get("/api/scan-history")
+async def get_scan_history(user=Depends(get_current_user)):
+    """Get scan history"""
+    try:
+        # Return mock scan history for demo
+        history = [
+            {
+                "id": 1,
+                "target": "localhost",
+                "type": "comprehensive",
+                "timestamp": "2026-01-06T18:30:00Z",
+                "findings": 4,
+                "status": "completed"
+            },
+            {
+                "id": 2,
+                "target": "192.168.1.1",
+                "type": "vulnerability", 
+                "timestamp": "2026-01-06T17:15:00Z",
+                "findings": 3,
+                "status": "completed"
+            }
+        ]
+        
+        return {"scans": history}
+        
+    except Exception as e:
+        logger.error("Failed to get scan history", error=str(e))
+        raise HTTPException(status_code=500, detail="Failed to retrieve scan history")
 
 if __name__ == "__main__":
     import uvicorn

@@ -22,7 +22,7 @@ const NetworkTraffic = () => {
       if (sourceIP) params.append('source_ip', sourceIP);
       params.append('limit', '200');
 
-      const response = await axios.get(`/api/traffic?${params}`, {
+      const response = await axios.get(`http://localhost:8001/api/traffic?${params}`, {
         headers: {
           'Authorization': 'Bearer demo-token'
         }

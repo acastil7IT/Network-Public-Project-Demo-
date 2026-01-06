@@ -25,7 +25,7 @@ const Incidents = () => {
       if (filters.severity) params.append('severity', filters.severity);
       if (filters.status) params.append('status', filters.status);
 
-      const response = await axios.get(`/api/incidents?${params}`, {
+      const response = await axios.get(`http://localhost:8001/api/incidents?${params}`, {
         headers: {
           'Authorization': 'Bearer demo-token'
         }
@@ -41,7 +41,7 @@ const Incidents = () => {
 
   const handleAcknowledge = async (incidentId) => {
     try {
-      await axios.post(`/api/incidents/${incidentId}/acknowledge`, {}, {
+      await axios.post(`http://localhost:8001/api/incidents/${incidentId}/acknowledge`, {}, {
         headers: {
           'Authorization': 'Bearer demo-token'
         }
@@ -60,7 +60,7 @@ const Incidents = () => {
       content: 'Are you sure you want to resolve this incident?',
       onOk: async () => {
         try {
-          await axios.post(`/api/incidents/${incidentId}/resolve`, {}, {
+          await axios.post(`http://localhost:8001/api/incidents/${incidentId}/resolve`, {}, {
             headers: {
               'Authorization': 'Bearer demo-token'
             }

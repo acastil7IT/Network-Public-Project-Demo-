@@ -6,13 +6,15 @@ import {
   AlertOutlined,
   GlobalOutlined,
   SettingOutlined,
-  SecurityScanOutlined
+  SecurityScanOutlined,
+  BugOutlined
 } from '@ant-design/icons';
 
 import Dashboard from './components/Dashboard';
 import Incidents from './components/Incidents';
 import NetworkTraffic from './components/NetworkTraffic';
 import LiveAlerts from './components/LiveAlerts';
+import AdvancedScanning from './components/AdvancedScanning';
 
 import './App.css';
 
@@ -43,6 +45,11 @@ function App() {
       key: '/alerts',
       icon: <SecurityScanOutlined />,
       label: 'Live Alerts',
+    },
+    {
+      key: '/advanced-scanning',
+      icon: <BugOutlined />,
+      label: 'Advanced Scanning',
     },
   ];
 
@@ -100,6 +107,7 @@ function App() {
               <Route path="/incidents" element={<Incidents />} />
               <Route path="/traffic" element={<NetworkTraffic />} />
               <Route path="/alerts" element={<LiveAlerts />} />
+              <Route path="/advanced-scanning" element={<AdvancedScanning />} />
             </Routes>
           </Content>
         </Layout>
